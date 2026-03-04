@@ -12,8 +12,8 @@ export const siteConfig = {
       'Ljus & Kraft Stockholm utför elinstallationer för privatpersoner och företag i Stockholm. Företaget levererar säkra, genomtänkta och hållbara lösningar.',
   },
   contact: {
-    email: 'oscar@lksgroup.se',
-    phone: '+46 73 655 41 98',
+    email: 'simon@develytech.se',
+    phone: '+46 70 080 97 24',
   },
   branding: {
     accentColor: '#1f2933',
@@ -40,8 +40,8 @@ export const siteConfig = {
   layoutUsage: {
     header: { width: 'wide', gutter: 'tight' },
     hero: { width: 'standard', gutter: 'wide' },
-    about: { width: 'wide', gutter: 'standard' },
-    services: { width: 'wide', gutter: 'standard' },
+    about: { width: 'standard', gutter: 'standard' },
+    services: { width: 'standard', gutter: 'standard' },
     gallery: { width: 'wide', gutter: 'tight' },
     contact: { width: 'wide', gutter: 'standard' },
     footer: { width: 'wide', gutter: 'tight' },

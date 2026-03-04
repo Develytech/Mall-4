@@ -87,8 +87,8 @@ layout:
 layoutUsage:
   header:   { width: "wide", gutter: "tight" }
   hero:     { width: "standard", gutter: "wide" }
-  about:    { width: "wide", gutter: "standard" }
-  services: { width: "wide", gutter: "standard" }
+  about:    { width: "standard", gutter: "standard" }
+  services: { width: "standard", gutter: "standard" }
   gallery:  { width: "wide", gutter: "tight" }
   contact:  { width: "wide", gutter: "standard" }
   footer:   { width: "wide", gutter: "tight" }
