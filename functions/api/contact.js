@@ -55,7 +55,9 @@ export async function onRequestPost({ request, env }) {
   // Provider config
   const resendKey = env.RESEND_API_KEY;
   const toEmail = env.CONTACT_TO_EMAIL;
-  const fromEmail = env.CONTACT_FROM_EMAIL || "Kontaktformulär <onboarding@resend.dev>";
+  let fromEmail = env.CONTACT_FROM_EMAIL || "Contact form <onboarding@resend.dev>";
+
+  fromEmail = fromEmail.replace(/[^\x00-\x7F]/g, "");
 
   if (!resendKey || !toEmail) {
     return json(
