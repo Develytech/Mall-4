@@ -71,6 +71,9 @@ export async function onRequestPost({ request, env }) {
     (phone ? `Telefon: ${phone}\n` : "") +
     `\nMeddelande:\n${message}\n`;
 
+    console.log("DEBUG_FROM_EMAIL_BEFORE_SEND:", fromEmail);
+    console.log("DEBUG_FROM_EMAIL_CODEPOINTS:", Array.from(fromEmail).map(c => c.charCodeAt(0)));
+
   // Send via Resend
   const resp = await fetch("https://api.resend.com/emails", {
     method: "POST",
