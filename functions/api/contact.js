@@ -57,8 +57,6 @@ export async function onRequestPost({ request, env }) {
   const toEmail = env.CONTACT_TO_EMAIL;
   const fromEmail = "Contact Form <onboarding@resend.dev>";
 
-  fromEmail = fromEmail.replace(/[^\x00-\x7F]/g, "");
-
   if (!resendKey || !toEmail) {
     return json(
       { error: "E-postleverantör är inte konfigurerad (saknar RESEND_API_KEY eller CONTACT_TO_EMAIL)." },
