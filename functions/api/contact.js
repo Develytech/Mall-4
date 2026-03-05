@@ -55,7 +55,7 @@ export async function onRequestPost({ request, env }) {
   // Provider config
   const resendKey = env.RESEND_API_KEY;
   const toEmail = env.CONTACT_TO_EMAIL;
-  let fromEmail = env.CONTACT_FROM_EMAIL || "Contact form <onboarding@resend.dev>";
+  const fromEmail = "Contact Form <onboarding@resend.dev>";
 
   fromEmail = fromEmail.replace(/[^\x00-\x7F]/g, "");
 
@@ -94,7 +94,7 @@ export async function onRequestPost({ request, env }) {
     return json({ error: "Kunde inte skicka meddelandet.", details }, 502);
   }
 
-  return json({ ok: true });
+  return json({ ok: true, version: "v1-failsafe" });
 }
 
 // Optional: handle OPTIONS for CORS if you ever call from another domain
