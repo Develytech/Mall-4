@@ -71,14 +71,6 @@ export async function onRequestPost({ request, env }) {
     (phone ? `Telefon: ${phone}\n` : "") +
     `\nMeddelande:\n${message}\n`;
 
-    return json({
-      debug: {
-        fromEmail,
-        toEmail,
-        resendKeyExists: Boolean(resendKey)
-      }
-    }, 200);
-
   // Send via Resend
   const resp = await fetch("https://api.resend.com/emails", {
     method: "POST",
