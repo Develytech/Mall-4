@@ -422,6 +422,7 @@ Functions (Cloudflare Pages Functions or equivalent):
 functions/
   api/
     contact.js
+    ping.js
 
 Rules:
 - All listed files must exist.
@@ -430,3 +431,152 @@ Rules:
 - Styling in src/styles/global.css.
 - Contact form MUST be end-to-end functional via /api/contact.
 - Assets must be referenced via absolute paths from /assets/... (from   public/). Example: "/assets/brand/hero.jpg"
+
+## Backend Functions (Cloudflare Pages)
+
+The project MUST implement backend endpoints using Cloudflare Pages Functions.
+
+The functions directory MUST follow the FILE MAP exactly.
+
+functions/
+  api/
+    contact.js
+    ping.js
+
+### functions/api/ping.js
+
+This endpoint is used to verify that Pages Functions are working.
+
+The file MUST contain exactly:
+
+```javascript
+export async function onRequestGet() {
+  return new Response(JSON.stringify({ ok: true, version: "ping-v1" }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8"
+    }
+  });
+}
+
+
+---
+
+## contact.js
+
+```md
+### functions/api/contact.js
+
+This endpoint processes the contact form and sends email via Resend.
+
+The implementation MUST match the following behaviour:
+
+- Accept JSON requests
+- Validate required fields
+- Reject invalid email
+- Use honeypot spam protection
+- Send mail using Resend API
+- Use reply_to so the receiver can reply directly to the sender
+
+The file MUST contain the following implementation:
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+function isEmail(s) {
+  return typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
+}
+
+function clean(s, max = 4000) {
+  if (typeof s !== "string") return "";
+  return s.replace(/\s+/g, " ").trim().slice(0, max);
+}
+
+function isHoneypotTripped(body) {
+  return typeof body?.company === "string" && body.company.trim().length > 0;
+}
+
+export async function onRequestPost({ request, env }) {
+  const ct = request.headers.get("content-type") || "";
+  if (!ct.includes("application/json")) {
+    return json({ error: "Fel format. Skicka JSON." }, 415);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "Ogiltig JSON." }, 400);
+  }
+
+  if (isHoneypotTripped(body)) {
+    return json({ ok: true });
+  }
+
+  const name = clean(body?.name, 120);
+  const email = clean(body?.email, 200);
+  const phone = clean(body?.phone, 60);
+  const message = clean(body?.message, 4000);
+
+  if (!name) return json({ error: "Namn saknas." }, 400);
+  if (!isEmail(email)) return json({ error: "Ogiltig e-postadress." }, 400);
+  if (!message) return json({ error: "Meddelande saknas." }, 400);
+
+  const resendKey = env.RESEND_API_KEY;
+  const toEmail = env.CONTACT_TO_EMAIL;
+  const fromEmail = env.CONTACT_FROM_EMAIL || "onboarding@resend.dev";
+
+  if (!resendKey || !toEmail) {
+    return json(
+      { error: "E-postleverantör är inte konfigurerad (saknar RESEND_API_KEY eller CONTACT_TO_EMAIL)." },
+      501
+    );
+  }
+
+  const subject = `Ny förfrågan från ${name}`;
+  const text =
+    `Namn: ${name}\n` +
+    `E-post: ${email}\n` +
+    (phone ? `Telefon: ${phone}\n` : "") +
+    `\nMeddelande:\n${message}\n`;
+
+  const resp = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: [toEmail],
+      subject,
+      reply_to: email,
+      text,
+    }),
+  });
+
+  if (!resp.ok) {
+    const details = await resp.text().catch(() => "");
+    return json({ error: "Kunde inte skicka meddelandet.", details }, 502);
+  }
+
+  return json({ ok: true });
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+}
