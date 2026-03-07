@@ -3,7 +3,14 @@ import { siteConfig } from '../content/site'
 
 export default function Contact({ shellClassName }) {
   const { company, contact, contactSection } = siteConfig
-  const [formState, setFormState] = useState({ name: '', email: '', message: '' })
+
+  const [formState, setFormState] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+  })
+
   const [status, setStatus] = useState('idle')
   const [feedback, setFeedback] = useState('')
 
@@ -23,19 +30,33 @@ export default function Contact({ shellClassName }) {
         headers: {
           'Content-Type': contactSection.form.contentType || 'application/json',
         },
-        body: JSON.stringify(formState),
+        body: JSON.stringify({
+          ...formState,
+          company: '', // honeypot, ska alltid vara tom
+        }),
       })
 
+      const data = await response.json().catch(() => ({}))
+
       if (!response.ok) {
-        throw new Error('request-failed')
+        throw new Error(data?.error || 'request-failed')
       }
 
       setStatus('success')
-      setFeedback(contactSection.form.successMessage || '')
-      setFormState({ name: '', email: '', message: '' })
-    } catch {
+      setFeedback(contactSection.form.successMessage || 'Tack! Vi återkommer så snart vi kan.')
+      setFormState({
+        name: '',
+        email: '',
+        phone: '',
+        message: '',
+      })
+    } catch (error) {
       setStatus('error')
-      setFeedback(contactSection.form.errorMessage || '')
+      setFeedback(
+        error.message && error.message !== 'request-failed'
+          ? error.message
+          : contactSection.form.errorMessage || 'Något gick fel. Försök igen.'
+      )
     }
   }
 
@@ -49,14 +70,16 @@ export default function Contact({ shellClassName }) {
           <aside className="contact__info" aria-label={contactSection.sectionTitle}>
             {contact.phone ? (
               <p>
-                <a href={`tel:${contact.phone}`}>{contact.phone}</a>
+                <a href={`tel:${contact.phone.replace(/\s+/g, '')}`}>{contact.phone}</a>
               </p>
             ) : null}
+
             {contact.email ? (
               <p>
                 <a href={`mailto:${contact.email}`}>{contact.email}</a>
               </p>
             ) : null}
+
             {company.location ? <p>{company.location}</p> : null}
             {contactSection.area ? <p>{contactSection.area}</p> : null}
             {contactSection.contactText ? <p>{contactSection.contactText}</p> : null}
@@ -88,6 +111,21 @@ export default function Contact({ shellClassName }) {
                 required
               />
 
+              {contactSection.form.fields.phoneLabel ? (
+                <>
+                  <label htmlFor="phone">{contactSection.form.fields.phoneLabel}</label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    value={formState.phone}
+                    onChange={onChange}
+                    placeholder={contactSection.form.fields.phonePlaceholder || 'Valfritt'}
+                  />
+                </>
+              ) : null}
+
               <label htmlFor="message">{contactSection.form.fields.messageLabel}</label>
               <textarea
                 id="message"
@@ -99,8 +137,19 @@ export default function Contact({ shellClassName }) {
                 required
               />
 
+              <input
+                type="text"
+                name="company"
+                value=""
+                onChange={() => {}}
+                tabIndex="-1"
+                autoComplete="off"
+                aria-hidden="true"
+                style={{ display: 'none' }}
+              />
+
               <button type="submit" className="btn" disabled={status === 'submitting'}>
-                {contactSection.form.fields.submitText}
+                {status === 'submitting' ? 'Skickar...' : contactSection.form.fields.submitText}
               </button>
 
               {feedback ? (

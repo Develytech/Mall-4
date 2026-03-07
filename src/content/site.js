@@ -152,9 +152,11 @@ export const siteConfig = {
       fields: {
         nameLabel: 'Namn',
         emailLabel: 'E-post',
+        phoneLabel: 'Telefon',
         messageLabel: 'Meddelande',
         namePlaceholder: 'Ditt namn',
         emailPlaceholder: 'din@mail.se',
+        phonePlaceholder: 'Valfritt',
         messagePlaceholder: 'Berätta kort...',
         submitText: 'Skicka',
       },

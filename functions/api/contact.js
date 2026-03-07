@@ -19,13 +19,11 @@ function clean(s, max = 4000) {
   return s.replace(/\s+/g, " ").trim().slice(0, max);
 }
 
-// Very light anti-bot: reject if honeypot filled
 function isHoneypotTripped(body) {
   return typeof body?.company === "string" && body.company.trim().length > 0;
 }
 
 export async function onRequestPost({ request, env }) {
-  // Only allow JSON
   const ct = request.headers.get("content-type") || "";
   if (!ct.includes("application/json")) {
     return json({ error: "Fel format. Skicka JSON." }, 415);
@@ -39,7 +37,6 @@ export async function onRequestPost({ request, env }) {
   }
 
   if (isHoneypotTripped(body)) {
-    // Pretend success to bots
     return json({ ok: true });
   }
 
@@ -52,7 +49,6 @@ export async function onRequestPost({ request, env }) {
   if (!isEmail(email)) return json({ error: "Ogiltig e-postadress." }, 400);
   if (!message) return json({ error: "Meddelande saknas." }, 400);
 
-  // Provider config
   const resendKey = env.RESEND_API_KEY;
   const toEmail = env.CONTACT_TO_EMAIL;
   const fromEmail = "onboarding@resend.dev";
@@ -71,7 +67,6 @@ export async function onRequestPost({ request, env }) {
     (phone ? `Telefon: ${phone}\n` : "") +
     `\nMeddelande:\n${message}\n`;
 
-  // Send via Resend
   const resp = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -92,10 +87,9 @@ export async function onRequestPost({ request, env }) {
     return json({ error: "Kunde inte skicka meddelandet.", details }, 502);
   }
 
-  return json({ ok: true, version: "v1-failsafe" });
+  return json({ ok: true });
 }
 
-// Optional: handle OPTIONS for CORS if you ever call from another domain
 export async function onRequestOptions() {
   return new Response(null, {
     status: 204,
