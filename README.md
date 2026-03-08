@@ -192,6 +192,9 @@ contactSection:
       submitText: "Skicka"
 
 footer:
+  description: "Elinstallationer för privatpersoner och företag i Stockholm med kranskommuner."
+  navigationTitle: "Snabblänkar"
+  contactTitle: "Kontakt"
   textTemplate: "© {YEAR} {COMPANY}. Alla rättigheter förbehållna."
 
 ---
@@ -365,6 +368,44 @@ Form rules:
 - Show success/error messages from CONFIG
 - Calm minimal styling, clear focus states, accessible labels
 
+### Footer
+Footer MUST be present and content-driven.
+
+Desktop layout (MUST):
+- Three-column layout
+- Column 1: company name + short description
+- Column 2: navigation links generated from CONFIG.navigation
+- Column 3: contact information
+- Bottom row: copyright text from CONFIG.footer.textTemplate
+
+Footer content rules:
+- Company name MUST come from CONFIG.company.name
+- Description MUST come from CONFIG.footer.description
+- Navigation title MUST come from CONFIG.footer.navigationTitle
+- Contact title MUST come from CONFIG.footer.contactTitle
+- Navigation links MUST reuse CONFIG.navigation
+- Contact column MUST show:
+  - phone if available
+  - email if available
+  - location if available
+
+Footer behavior:
+- Keep the footer visually calm and minimal
+- No heavy borders, no strong shadows, no oversized cards
+- Footer links must be accessible and clearly clickable
+- Phone number MUST use a tel: link
+- Email MUST use a mailto: link
+
+Mobile layout (MUST):
+- Stack all footer columns vertically
+- Keep generous spacing between groups
+- Bottom copyright row remains below all footer content
+
+Premium constraints:
+- Footer should feel clean and structured
+- Avoid clutter and excessive content
+- Use only the content defined in CONFIG
+
 ### Typography + spacing constraints
 Use layout config values for section paddings.
 Use layoutUsage width/gutter per section (no single global container).
@@ -431,6 +472,7 @@ Rules:
 - Styling in src/styles/global.css.
 - Contact form MUST be end-to-end functional via /api/contact.
 - Assets must be referenced via absolute paths from /assets/... (from   public/). Example: "/assets/brand/hero.jpg"
+- Footer.jsx MUST render company info, navigation, and contact info from CONFIG.footer, CONFIG.company, CONFIG.contact, and CONFIG.navigation.
 
 ## Backend Functions (Cloudflare Pages)
 
@@ -442,6 +484,49 @@ functions/
   api/
     contact.js
     ping.js
+
+## Footer Component
+
+### src/components/Footer.jsx
+
+The footer MUST be content-driven and use the following config sources:
+
+- `siteConfig.company.name`
+- `siteConfig.footer.description`
+- `siteConfig.footer.navigationTitle`
+- `siteConfig.footer.contactTitle`
+- `siteConfig.navigation`
+- `siteConfig.contact`
+- `siteConfig.company.location`
+- `siteConfig.footer.textTemplate`
+
+The component MUST render:
+
+1. Company column
+   - company name
+   - footer description
+
+2. Navigation column
+   - title from `footer.navigationTitle`
+   - links generated from `navigation`
+
+3. Contact column
+   - title from `footer.contactTitle`
+   - clickable phone link if present
+   - clickable email link if present
+   - location text if present
+
+4. Bottom row
+   - copyright text generated from `footer.textTemplate`
+   - replace `{YEAR}` with current year
+   - replace `{COMPANY}` with company name
+
+Rules:
+- No hardcoded company-specific content
+- Navigation MUST reuse CONFIG.navigation
+- Footer MUST be responsive
+- Footer MUST use semantic links
+- Footer MUST remain visually minimal and premium
 
 ### functions/api/ping.js
 
