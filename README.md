@@ -36,6 +36,8 @@ Implementation example:
 scroll-behavior: smooth;
 All section IDs are predefined
 Navigation must be generated from CONFIG.navigation
+All primary UI colors MUST be derived from CONFIG.branding.
+Small utility colors, borders, overlays, and neutral rgba values MAY be hardcoded when explicitly specified in WEBSITE SPEC.
 
 IMPORTANT: Contact form MUST be real (API). Mock submit is forbidden in this template.
 
@@ -60,7 +62,14 @@ contact:
 
 branding:
   accentColor: "#1f2933"
-  logoPath: "/assets/logo.png"
+
+  backgroundColor: "#f8fafc"
+  textColor: "#111827"
+
+  footerBackground: "#1f2933"
+  footerTextColor: "#ffffff"
+
+  logoPath: "/assets/brand/logo.png"
   fontFamily: "system"
 
 layout:
@@ -99,7 +108,7 @@ motion:
   staggerMs: 90
 
 hero:
-  imagePath: "/assets/hero.jpg"
+  imagePath: "/assets/brand/hero.jpg"
   badge: "ELINSTALLATION • LJUSDESIGN • STYRSYSTEM • PROJEKTERING"
   headline: "Elinstallationer med precision och känsla för detaljer."
   subtext: "För privatpersoner och företag i Stockholm."
@@ -115,7 +124,7 @@ navigation:
     target: "about"
   - label: "Tjänster"
     target: "services"
-  - label: "Projekt"
+  - label: "Bildgalleri"
     target: "gallery"
   - label: "Kontakta oss"
     target: "contact"
@@ -135,7 +144,7 @@ about:
     label: "Kontakta oss"
     target: "contact"
   image:
-    src: "/assets/about.jpg"
+    src: "/assets/about/about.jpg"
     alt: "Elektriker som installerar utrustning"
   overlay:
     label: "STOCKHOLM"
@@ -158,8 +167,8 @@ services:
       desc: "Installation av funktionell och energieffektiv belysning för bostäder, kommersiella lokaler och industri."
 
 gallery:
-  sectionTitle: "Projekt"
-  sectionText: "Ett urval av installationer och projekt."
+  sectionTitle: "Bildgalleri"
+  sectionText: "Ett urval av bilder från våra installationer och arbeten."
   behavior:
     aspectRatio: "9/16"
     desktopColumns: 3
@@ -177,19 +186,25 @@ contactSection:
   sectionTitle: "Kontakt"
   sectionText: "Hör av dig med frågor eller underlag, så återkommer vi."
   contactText: "Ljus & Kraft Stockholm utför alla typer av elinstallationer."
-  area: "Stockholm med kranskommuner"
+
   form:
     enabled: true
     submitBehavior: "api"
     endpoint: "/api/contact"
+    method: "POST"
+    contentType: "application/json"
     fields:
       nameLabel: "Namn"
       emailLabel: "E-post"
+      phoneLabel: "Telefon"
       messageLabel: "Meddelande"
       namePlaceholder: "Ditt namn"
       emailPlaceholder: "din@mail.se"
-      messagePlaceholder: "Berätta kort..."
+      phonePlaceholder: "Valfritt"
+      messagePlaceholder: "Beskriv kort vad du behöver hjälp med..."
       submitText: "Skicka"
+    successMessage: "Tack! Vi återkommer så snart vi kan."
+    errorMessage: "Något gick fel. Försök igen eller kontakta oss via telefon/e-post."
 
 footer:
   description: "Elinstallationer för privatpersoner och företag i Stockholm med kranskommuner."
@@ -210,7 +225,7 @@ Avoid app-like UI. Content-first layout.
 1. Hero
 2. Om oss (About)
 3. Tjänster (Services)
-4. Projektbilder (Gallery)
+4. Bildgalleri (Gallery)
 5. Kontakt (Contact)
 6. Footer
 
@@ -241,6 +256,88 @@ Each section component MUST include the matching id attribute.
 Example:
 
 <section id="about">...</section>
+
+Mobile header (MUST):
+
+On mobile screens, the header MUST switch to a compact mobile navigation pattern.
+
+Closed mobile state:
+- Logo/brand on the left
+- One menu toggle button on the right
+- Header content must stay on a single row
+- Inline desktop navigation MUST NOT remain visible
+- The header height must remain controlled and compact
+
+Open mobile menu state:
+- Navigation links MUST be shown in a vertical stack
+- Menu panel may appear as a dropdown below the header or a full-width overlay panel
+- Links MUST remain generated from CONFIG.navigation
+- The mobile menu MUST include the same navigation items as desktop
+- Tapping a navigation item MUST close the mobile menu and scroll to the section
+
+Mobile header layout rules:
+- Logo area must be allowed to shrink without breaking layout
+- Navigation text must never overlap the logo
+- Header content must not wrap into multiple broken rows
+- Long company names/logos must still fit within the mobile header layout
+- Use clear spacing between logo and menu toggle
+
+### Mobile navigation
+
+The mobile navigation MUST use a minimal hamburger icon.
+
+Rules:
+- Mobile toggle MUST be a semantic button element for accessibility
+- Use only three horizontal lines
+- The control MUST appear visually as a standalone hamburger icon (not a boxed/bubbled button)
+- Do NOT show a visible button box, border, or background behind the icon
+- Icon must appear visually light and minimal
+
+Position:
+- top right of the header
+- vertically centered with the logo
+
+Tap area:
+- minimum 44px tap area for accessibility
+
+Desktop rules:
+- Desktop navigation remains inline
+- Mobile toggle button MUST be hidden on desktop
+
+Accessibility:
+- Mobile navigation must be keyboard accessible
+- Focus order must remain logical
+- Menu state must be communicated with aria-expanded
+
+### Section scroll animation
+
+Sections SHOULD use a subtle entrance animation when they enter the viewport.
+
+Behavior:
+- Sections fade in when scrolled into view
+- Sections slide upward slightly during the animation
+
+Animation rules:
+- Initial state:
+  opacity: 0
+  transform: translateY(30px)
+
+- Final state:
+  opacity: 1
+  transform: translateY(0)
+
+Timing:
+- duration: 500–700ms
+- easing: ease-out
+
+Trigger:
+- Animation MUST start when the section enters the viewport
+- Use IntersectionObserver or equivalent
+
+Constraints:
+- Animation MUST be subtle
+- Do not delay content visibility excessively
+- Animation MUST run only once per section
 
 
 ### Hero section
@@ -358,15 +455,183 @@ Premium constraints:
 - Photos must feel like photos (minimal border, subtle radius)
 - Avoid heavy shadows, glass effects, or strong borders
 
+### Mobile gallery interaction (MUST)
+
+The gallery MUST remain horizontally scrollable on mobile devices.
+
+Purpose:
+The horizontal rail allows users to quickly scan multiple project images while scrolling the page.
+
+Mobile behaviour rules:
+
+- Images MUST be displayed in a horizontal scrollable rail.
+- The next image MUST partially peek from the right edge to indicate that more images are available.
+- Users MUST be able to swipe horizontally to browse images.
+
+Image interaction:
+
+- When a user taps an image, it MUST open in a fullscreen image viewer.
+- The fullscreen viewer MUST display the tapped image first.
+- Users MUST be able to swipe left/right to navigate between images in fullscreen mode.
+- The viewer MUST allow closing via a visible close button or tap outside.
+
+Fullscreen viewer requirements:
+
+- Dark background overlay
+- Image centered on screen
+- Swipe gesture for navigation
+- Close control SHOULD use an icon-style button (preferred: `✕`) instead of text like "Stäng"
+- Close control MAY be a subtle rounded icon button for a native viewer feel
+- Image index indicator (example: "2 / 8") SHOULD be visible and placed near the top or bottom overlay area, not centered over the main image content
+- Fullscreen image sizing MUST use:
+  - max-width: 92vw
+  - max-height: 88vh
+  - object-fit: contain
+
+Constraints:
+
+- Gallery images MUST remain portrait format.
+- Horizontal scrolling MUST remain the primary browsing method on the page.
+- Fullscreen viewer is a secondary interaction for detailed viewing.
+
 ### Contact section (MUST be API)
-Layout:
-- Left: contact info (phone/email/location if available)
-- Right: form (if enabled)
-Form rules:
-- Submit behavior MUST call the API endpoint (no mock)
-- Use JSON per CONFIG.contactSection.form
-- Show success/error messages from CONFIG
-- Calm minimal styling, clear focus states, accessible labels
+
+Purpose:
+The contact section is one of the most important conversion sections on the page.
+It MUST feel balanced, structured, and trustworthy.
+
+Desktop layout (MUST):
+- The entire contact section content MUST be centered inside the section container
+- The heading and intro text MUST align with the same container as the contact layout below
+- Use a balanced two-column grid for the content row
+- Left column: contact information
+- Right column: contact form
+- Recommended desktop grid:
+  - left column: minmax(260px, 340px)
+  - right column: minmax(420px, 560px)
+- Gap between columns MUST feel generous (approx 72–96px)
+- The full contact block MUST NOT feel stretched across the entire page width
+- The form column MUST NOT exceed 560px width
+
+Visual composition (MUST):
+- The heading and intro text MUST sit above the two-column layout
+- The heading MUST NOT appear detached or pushed further left than the content row
+- The section MUST feel visually centered and compact, not left-heavy
+
+Heading/intro alignment (MUST):
+- Contact section heading and intro text MUST use the same max-width and horizontal alignment as the contact two-column block.
+- They MUST be centered within the contact section container (not start at far-left container edge).
+- On desktop, heading+intro and the contact grid MUST share one visual content column width.
+- Implementation requirement: title/text wrapper width MUST match the contact block max-width.
+- The heading and intro text SHOULD be text-aligned center on desktop.
+
+Left column content (MUST):
+The left column MUST display available contact information from CONFIG.
+
+Display these if available:
+- phone from CONFIG.contact.phone
+- email from CONFIG.contact.email
+- location from CONFIG.company.location
+- text from CONFIG.contactSection.contactText
+
+Do NOT render duplicate location information.
+If both CONFIG.company.location and CONFIG.contactSection.area exist and contain the same meaning, show only one location row.
+
+Left column structure (MUST):
+Contact information MUST be grouped into clearly separated info blocks.
+
+Recommended structure:
+
+Phone
++46 ...
+
+Email
+mail@example.se
+
+Område
+Stockholm med kranskommuner
+
+About / short text
+Short supporting contact text
+
+Each info block MUST have:
+- a small label
+- a value below it or beside it
+- clear spacing between blocks
+
+Info label style (MUST):
+- font-size: 12px
+- letter-spacing: 0.08em
+- font-weight: 600
+- color: #6b7280
+- Labels MUST be clearly readable and must NOT look like placeholder text.
+
+Phone MUST use a tel: link.
+Email MUST use a mailto: link.
+
+Form fields (MUST):
+The form MUST include:
+1. name
+2. email
+3. phone (optional)
+4. message
+
+Phone MUST be optional.
+Labels MUST be visible and MUST NOT rely on placeholders alone.
+
+Form behaviour (MUST):
+Submit MUST call the API endpoint defined in:
+CONFIG.contactSection.form.endpoint
+
+HTTP method MUST use:
+CONFIG.contactSection.form.method
+
+Content-Type MUST use:
+CONFIG.contactSection.form.contentType
+
+Request format MUST be JSON with fields:
+- name
+- email
+- phone (optional)
+- message
+- company (hidden honeypot, must be sent as empty string by the frontend)
+
+Success and error messages MUST use:
+- CONFIG.contactSection.form.successMessage
+- CONFIG.contactSection.form.errorMessage
+
+Form design rules (MUST):
+Inputs and textarea MUST have:
+- full width
+- minimum padding around 14px
+- border-radius around 10–14px
+- subtle border
+- clear focus state using branding.accentColor
+
+Textarea MUST be visually taller than standard inputs and suitable for longer messages.
+
+Submit button MUST:
+- use branding.accentColor
+- be visually prominent
+- feel clearly clickable
+- not look like a text link or ghost button
+- use width: fit-content
+- use min-width: 220px
+- have margin-top: 16px
+- be aligned so it does not span the full form width by default
+
+Visual constraints:
+- Avoid heavy shadows
+- Avoid thick borders
+- Avoid oversized empty space
+- Keep styling minimal and calm
+- The contact form MUST feel professional and premium
+
+Mobile layout (MUST):
+- Contact info MUST appear first
+- Form MUST appear below
+- Columns MUST stack vertically
+- Keep generous vertical spacing between the intro, info, and form
 
 ### Footer
 Footer MUST be present and content-driven.
@@ -388,6 +653,7 @@ Footer content rules:
   - phone if available
   - email if available
   - location if available
+- Footer styling MUST use branding.footerBackground and branding.footerTextColor if defined.
 
 Footer behavior:
 - Keep the footer visually calm and minimal
@@ -471,6 +737,9 @@ Rules:
 - No company-specific strings hardcoded in components.
 - Styling in src/styles/global.css.
 - Contact form MUST be end-to-end functional via /api/contact.
+- Contact form field labels/placeholders MUST come from CONFIG.contactSection.form.fields.
+- Contact form MUST include name, email, phone (optional), and message.
+- Contact success/error UI messages MUST come from CONFIG.contactSection.form.successMessage and CONFIG.contactSection.form.errorMessage.
 - Assets must be referenced via absolute paths from /assets/... (from   public/). Example: "/assets/brand/hero.jpg"
 - Footer.jsx MUST render company info, navigation, and contact info from CONFIG.footer, CONFIG.company, CONFIG.contact, and CONFIG.navigation.
 
@@ -543,13 +812,13 @@ export async function onRequestGet() {
     }
   });
 }
+```
 
 
 ---
 
 ## contact.js
 
-```md
 ### functions/api/contact.js
 
 This endpoint processes the contact form and sends email via Resend.
@@ -665,3 +934,4 @@ export async function onRequestOptions() {
     },
   });
 }
+```

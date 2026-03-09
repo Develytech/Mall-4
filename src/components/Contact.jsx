@@ -3,6 +3,7 @@ import { siteConfig } from '../content/site'
 
 export default function Contact({ shellClassName }) {
   const { company, contact, contactSection } = siteConfig
+  const location = typeof company.location === 'string' ? company.location.trim() : ''
 
   const [formState, setFormState] = useState({
     name: '',
@@ -26,13 +27,13 @@ export default function Contact({ shellClassName }) {
 
     try {
       const response = await fetch(contactSection.form.endpoint, {
-        method: contactSection.form.method || 'POST',
+        method: contactSection.form.method,
         headers: {
-          'Content-Type': contactSection.form.contentType || 'application/json',
+          'Content-Type': contactSection.form.contentType,
         },
         body: JSON.stringify({
           ...formState,
-          company: '', // honeypot, ska alltid vara tom
+          company: '',
         }),
       })
 
@@ -43,20 +44,16 @@ export default function Contact({ shellClassName }) {
       }
 
       setStatus('success')
-      setFeedback(contactSection.form.successMessage || 'Tack! Vi återkommer så snart vi kan.')
+      setFeedback(contactSection.form.successMessage)
       setFormState({
         name: '',
         email: '',
         phone: '',
         message: '',
       })
-    } catch (error) {
+    } catch {
       setStatus('error')
-      setFeedback(
-        error.message && error.message !== 'request-failed'
-          ? error.message
-          : contactSection.form.errorMessage || 'Något gick fel. Försök igen.'
-      )
+      setFeedback(contactSection.form.errorMessage)
     }
   }
 
@@ -69,20 +66,36 @@ export default function Contact({ shellClassName }) {
         <div className="contact">
           <aside className="contact__info" aria-label={contactSection.sectionTitle}>
             {contact.phone ? (
-              <p>
-                <a href={`tel:${contact.phone.replace(/\s+/g, '')}`}>{contact.phone}</a>
-              </p>
+              <div className="contact__infoBlock">
+                <p className="contact__infoLabel">Telefon</p>
+                <p className="contact__infoValue">
+                  <a href={`tel:${contact.phone.replace(/\s+/g, '')}`}>{contact.phone}</a>
+                </p>
+              </div>
             ) : null}
 
             {contact.email ? (
-              <p>
-                <a href={`mailto:${contact.email}`}>{contact.email}</a>
-              </p>
+              <div className="contact__infoBlock">
+                <p className="contact__infoLabel">E-post</p>
+                <p className="contact__infoValue">
+                  <a href={`mailto:${contact.email}`}>{contact.email}</a>
+                </p>
+              </div>
             ) : null}
 
-            {company.location ? <p>{company.location}</p> : null}
-            {contactSection.area ? <p>{contactSection.area}</p> : null}
-            {contactSection.contactText ? <p>{contactSection.contactText}</p> : null}
+            {location ? (
+              <div className="contact__infoBlock">
+                <p className="contact__infoLabel">Område</p>
+                <p className="contact__infoValue">{location}</p>
+              </div>
+            ) : null}
+
+            {contactSection.contactText ? (
+              <div className="contact__infoBlock">
+                <p className="contact__infoLabel">Om oss</p>
+                <p className="contact__infoValue">{contactSection.contactText}</p>
+              </div>
+            ) : null}
           </aside>
 
           {contactSection.form.enabled ? (
@@ -121,7 +134,7 @@ export default function Contact({ shellClassName }) {
                     autoComplete="tel"
                     value={formState.phone}
                     onChange={onChange}
-                    placeholder={contactSection.form.fields.phonePlaceholder || 'Valfritt'}
+                    placeholder={contactSection.form.fields.phonePlaceholder}
                   />
                 </>
               ) : null}
@@ -149,7 +162,7 @@ export default function Contact({ shellClassName }) {
               />
 
               <button type="submit" className="btn" disabled={status === 'submitting'}>
-                {status === 'submitting' ? 'Skickar...' : contactSection.form.fields.submitText}
+                {contactSection.form.fields.submitText}
               </button>
 
               {feedback ? (

@@ -1,5 +1,3 @@
-// functions/api/contact.js
-
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -51,7 +49,7 @@ export async function onRequestPost({ request, env }) {
 
   const resendKey = env.RESEND_API_KEY;
   const toEmail = env.CONTACT_TO_EMAIL;
-  const fromEmail = "onboarding@resend.dev";
+  const fromEmail = env.CONTACT_FROM_EMAIL || "onboarding@resend.dev";
 
   if (!resendKey || !toEmail) {
     return json(

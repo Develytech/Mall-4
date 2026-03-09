@@ -19,9 +19,14 @@ function ArrowIcon({ direction }) {
 export default function Gallery({ shellClassName }) {
   const content = galleryContent
   const railRef = useRef(null)
+  const touchStartXRef = useRef(0)
   const reducedMotion = useReducedMotion()
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const [activeImageIndex, setActiveImageIndex] = useState(-1)
+
+  const hasViewerOpen = activeImageIndex >= 0
+  const totalImages = content.images.length
 
   const railVars = useMemo(
     () => ({
@@ -29,7 +34,7 @@ export default function Gallery({ shellClassName }) {
       '--g-edge': `${content.behavior.edgePaddingPx}px`,
       '--g-cols': `${content.behavior.desktopColumns}`,
       '--g-aspect-ratio': content.behavior.aspectRatio,
-      '--g-fit': content.behavior.imageFit || 'cover',
+      '--g-fit': content.behavior.imageFit,
     }),
     [content]
   )
@@ -78,6 +83,60 @@ export default function Gallery({ shellClassName }) {
     })
   }
 
+  const openViewer = (index) => {
+    setActiveImageIndex(index)
+  }
+
+  const closeViewer = () => {
+    setActiveImageIndex(-1)
+  }
+
+  const goToNextImage = () => {
+    setActiveImageIndex((prev) => (prev + 1) % totalImages)
+  }
+
+  const goToPreviousImage = () => {
+    setActiveImageIndex((prev) => (prev - 1 + totalImages) % totalImages)
+  }
+
+  useEffect(() => {
+    if (!hasViewerOpen) {
+      return undefined
+    }
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeViewer()
+      }
+      if (event.key === 'ArrowRight') {
+        goToNextImage()
+      }
+      if (event.key === 'ArrowLeft') {
+        goToPreviousImage()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [hasViewerOpen, totalImages])
+
+  const onViewerTouchStart = (event) => {
+    touchStartXRef.current = event.changedTouches[0].clientX
+  }
+
+  const onViewerTouchEnd = (event) => {
+    const touchEndX = event.changedTouches[0].clientX
+    const deltaX = touchEndX - touchStartXRef.current
+    if (Math.abs(deltaX) < 40) {
+      return
+    }
+    if (deltaX < 0) {
+      goToNextImage()
+    } else {
+      goToPreviousImage()
+    }
+  }
+
   return (
     <section id="gallery" className="section gallery" style={railVars}>
       <div className={shellClassName}>
@@ -85,17 +144,15 @@ export default function Gallery({ shellClassName }) {
         {content.sectionText ? <p className="section__text">{content.sectionText}</p> : null}
 
         <div className="gallery__viewport">
-          {(content.behavior.showArrowsDesktop ?? true) ? (
-            <button
-              type="button"
-              className="gallery__arrow"
-              aria-label="Föregående bilder"
-              onClick={() => scrollByCard('left')}
-              disabled={!canScrollLeft}
-            >
-              <ArrowIcon direction="left" />
-            </button>
-          ) : null}
+          <button
+            type="button"
+            className="gallery__arrow"
+            aria-label="Föregående bilder"
+            onClick={() => scrollByCard('left')}
+            disabled={!canScrollLeft}
+          >
+            <ArrowIcon direction="left" />
+          </button>
 
           <div className="gallery__railWrap">
             <div
@@ -118,29 +175,82 @@ export default function Gallery({ shellClassName }) {
             >
               {content.images.map((image, index) => (
                 <article className="gallery__card" key={`${image.src}-${index}`}>
-                  <img
-                    src={image.src}
-                    alt={image.alt || `${content.sectionTitle} ${index + 1}`}
-                    className="gallery__image"
-                  />
+                  <button
+                    type="button"
+                    className="gallery__imageButton"
+                    onClick={() => openViewer(index)}
+                    aria-label={`Öppna bild ${index + 1}`}
+                  >
+                    <img src={image.src} alt={image.alt} className="gallery__image" />
+                  </button>
                 </article>
               ))}
             </div>
           </div>
 
-          {(content.behavior.showArrowsDesktop ?? true) ? (
-            <button
-              type="button"
-              className="gallery__arrow"
-              aria-label="Nästa bilder"
-              onClick={() => scrollByCard('right')}
-              disabled={!canScrollRight}
-            >
-              <ArrowIcon direction="right" />
-            </button>
-          ) : null}
+          <button
+            type="button"
+            className="gallery__arrow"
+            aria-label="Nästa bilder"
+            onClick={() => scrollByCard('right')}
+            disabled={!canScrollRight}
+          >
+            <ArrowIcon direction="right" />
+          </button>
         </div>
       </div>
+
+      {hasViewerOpen ? (
+        <div
+          className="gallery__viewer"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Bildvisare"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              closeViewer()
+            }
+          }}
+        >
+          <button type="button" className="gallery__viewerClose" onClick={closeViewer} aria-label="Stäng bildvisare">
+            ✕
+          </button>
+
+          <button
+            type="button"
+            className="gallery__viewerNav gallery__viewerNav--left"
+            onClick={goToPreviousImage}
+            aria-label="Föregående bild"
+          >
+            <ArrowIcon direction="left" />
+          </button>
+
+          <div
+            className="gallery__viewerContent"
+            onTouchStart={onViewerTouchStart}
+            onTouchEnd={onViewerTouchEnd}
+          >
+            <img
+              src={content.images[activeImageIndex].src}
+              alt={content.images[activeImageIndex].alt}
+              className="gallery__viewerImage"
+            />
+          </div>
+
+          <p className="gallery__viewerIndex">
+            {activeImageIndex + 1} / {totalImages}
+          </p>
+
+          <button
+            type="button"
+            className="gallery__viewerNav gallery__viewerNav--right"
+            onClick={goToNextImage}
+            aria-label="Nästa bild"
+          >
+            <ArrowIcon direction="right" />
+          </button>
+        </div>
+      ) : null}
     </section>
   )
 }

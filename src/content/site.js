@@ -12,12 +12,16 @@ export const siteConfig = {
       'Ljus & Kraft Stockholm utför elinstallationer för privatpersoner och företag i Stockholm. Företaget levererar säkra, genomtänkta och hållbara lösningar.',
   },
   contact: {
-    email: 'simon@develytech.se',
-    phone: '+46 70 080 97 24',
+    email: 'oscar@lksgroup.se',
+    phone: '+46 73 655 41 98',
   },
   branding: {
     accentColor: '#1f2933',
-    logoPath: '/assets/logo.png',
+    backgroundColor: '#f8fafc',
+    textColor: '#111827',
+    footerBackground: '#1f2933',
+    footerTextColor: '#ffffff',
+    logoPath: '/assets/brand/logo.png',
     fontFamily: 'system',
   },
   layout: {
@@ -52,7 +56,7 @@ export const siteConfig = {
     staggerMs: 90,
   },
   hero: {
-    imagePath: '/assets/hero.jpg',
+    imagePath: '/assets/brand/hero.jpg',
     badge: 'ELINSTALLATION • LJUSDESIGN • STYRSYSTEM • PROJEKTERING',
     headline: 'Elinstallationer med precision och känsla för detaljer.',
     subtext: 'För privatpersoner och företag i Stockholm.',
@@ -68,7 +72,7 @@ export const siteConfig = {
   navigation: [
     { label: 'Om oss', target: 'about' },
     { label: 'Tjänster', target: 'services' },
-    { label: 'Projekt', target: 'gallery' },
+    { label: 'Bildgalleri', target: 'gallery' },
     { label: 'Kontakta oss', target: 'contact' },
   ],
   about: {
@@ -89,7 +93,7 @@ export const siteConfig = {
       target: 'contact',
     },
     image: {
-      src: '/assets/about/about.jpg',
+      src: '/assets/brand/about.jpg',
       alt: 'Elektriker som installerar utrustning',
     },
     overlay: {
@@ -126,8 +130,8 @@ export const siteConfig = {
     ],
   },
   gallery: {
-    sectionTitle: 'Projekt',
-    sectionText: 'Ett urval av installationer och projekt.',
+    sectionTitle: 'Bildgalleri',
+    sectionText: 'Ett urval av bilder från våra installationer och arbeten.',
     behavior: {
       aspectRatio: '9/16',
       desktopColumns: 3,
@@ -144,11 +148,12 @@ export const siteConfig = {
     sectionTitle: 'Kontakt',
     sectionText: 'Hör av dig med frågor eller underlag, så återkommer vi.',
     contactText: 'Ljus & Kraft Stockholm utför alla typer av elinstallationer.',
-    area: 'Stockholm med kranskommuner',
     form: {
       enabled: true,
       submitBehavior: 'api',
       endpoint: '/api/contact',
+      method: 'POST',
+      contentType: 'application/json',
       fields: {
         nameLabel: 'Namn',
         emailLabel: 'E-post',
@@ -157,12 +162,17 @@ export const siteConfig = {
         namePlaceholder: 'Ditt namn',
         emailPlaceholder: 'din@mail.se',
         phonePlaceholder: 'Valfritt',
-        messagePlaceholder: 'Berätta kort...',
+        messagePlaceholder: 'Beskriv kort vad du behöver hjälp med...',
         submitText: 'Skicka',
       },
+      successMessage: 'Tack! Vi återkommer så snart vi kan.',
+      errorMessage: 'Något gick fel. Försök igen eller kontakta oss via telefon/e-post.',
     },
   },
   footer: {
+    description: 'Elinstallationer för privatpersoner och företag i Stockholm med kranskommuner.',
+    navigationTitle: 'Snabblänkar',
+    contactTitle: 'Kontakt',
     textTemplate: '© {YEAR} {COMPANY}. Alla rättigheter förbehållna.',
   },
 }
